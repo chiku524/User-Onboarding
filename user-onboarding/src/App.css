@@ -1,3 +1,14 @@
-body {
-  margin: 20% 45%;
+form {
+  margin: 10% 35% 3%;
+}
+
+.teamMember {
+  margin: 7%;
+  color: green;
+  border: 2px solid purple;
+}
+
+.error {
+  color: red;
+  text-align: center;
 }

@@ -1,4 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import axios from 'axios';
+import * as yup from 'yup';
+import Team from './Team';
 
 const Form = (props) => {
     const [user, setUser] = useState({
@@ -8,33 +11,104 @@ const Form = (props) => {
         terms_of_service: false
     })
 
+    const [errors, setErrors] = useState({
+        name: '',
+        email: '',
+        password: '',
+        terms_of_service: ''
+    })
+
+    const [post, setPost] = useState([]);
+
+    const [buttonDisabled, setButtonDisabled] = useState("");
+
+    const formSchema = yup.object().shape({
+        name: yup.string().required("Name is a required field"),
+        email: yup.string().email("Must be a valid email").required(),
+        password: yup
+            .string()
+            .required("Please enter your password")
+            .min(8, "Password is too short - should be 8 characters minimum.")
+            .matches(/[a-zA-Z@]/),
+        terms_of_service: yup.boolean().oneOf([true], "Please agree to terms of service")
+    })
+
+    useEffect(() => {
+        formSchema.isValid(user).then((valid) => {
+            setButtonDisabled(!valid);
+        })
+    }, [user]);
+
+    const validate = (event) => {
+        yup
+          .reach(formSchema, event.target.name)
+          .validate(event.target.value)
+          .then((valid) => {
+            setErrors({
+              ...errors,
+              [event.target.name]: "",
+            });
+          })
+          .catch((error) => {
+              console.log(error.errors)
+            setErrors({
+              ...errors,
+              [event.target.name]: error.errors[0]
+            });
+            
+          });
+      };
+
     const formSubmit = (event) => {
         event.preventDefault();
+        axios.post('https://reqres.in/api/users', user)
+            .then((response => {
+                setPost([...post, response.data]);
+                console.log(post);
+                setUser({
+                    name: '',
+                    email: '',
+                    password: '',
+                    terms_of_service: ''
+                })
+            }))
+            .catch((error) => {
+                console.log(error)
+            })
     }
 
     const inputChange = (event) => {
-        let value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
-        setUser({...user, [event.target.name]: event.target.value });
-    }
+        event.persist();
+        const newFormData = {
+          ...user,
+          [event.target.name]:
+            event.target.type === "checkbox" ? event.target.checked : event.target.value,
+        };
+        validate(event);
+        setUser(newFormData);
+      };
 
     return (
-        <form onSubmit={formSubmit}>
-            <label htmlFor="user">User
-                <label htmlFor='name'>Name
-                    <input type='text' placeholder='name' name='name' value={user.name} onChange={inputChange} /> <br />
+        <div>
+            <form onSubmit={formSubmit} className='form'> 
+                <label htmlFor="user">User
+                    <label htmlFor='name'>Name
+    <input type='text' placeholder='name' name='name' value={user.name} onChange={inputChange} /> {errors.email.length > 0 ? <p className='error'>{errors.email}</p> : null} <br />
+                    </label>
+                    <label htmlFor='email'>Email
+                        <input type='text' placeholder='email' name='email' value={user.email} onChange={inputChange} /> <br />
+                    </label>
+                    <label htmlFor='password'>Password
+                        <input type='text' placeholder='password' name='password' value={user.password} onChange={inputChange} /> {errors.password.length > 0 ? <p className='error'>{errors.password}</p> : null} <br />
+                    </label>
+                    <label htmlFor='terms_of_service'>I have read the Terms and Conditions
+                        <input type='checkbox' name='terms_of_service' onChange={inputChange} checked={user.terms_of_service} /> <br />
+                    </label>
+                    <button>Submit</button>
                 </label>
-                <label htmlFor='email'>Email
-                    <input type='text' placeholder='email' name='email' value={user.email} onChange={inputChange} /> <br />
-                </label>
-                <label htmlFor='password'>Password
-                    <input type='text' placeholder='password' name='password' value={user.password} onChange={inputChange} /> <br />
-                </label>
-                <label htmlFor='terms_of_service'>I have read the Terms and Conditions
-                    <input type='checkbox' name='terms_of_service' onChange={inputChange} checked={user.terms_of_service} /> <br />
-                </label>
-                <button>Submit</button>
-            </label>
-        </form>
+            </form>
+            {post.map((user) => (<Team className='teamMember' name={user.name} email={user.email} terms_of_service={user.terms_of_service} /> ))}
+        </div>
     )
 }
 
