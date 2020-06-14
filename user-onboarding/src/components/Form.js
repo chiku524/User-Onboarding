@@ -8,14 +8,16 @@ const Form = (props) => {
         name: '',
         email: '',
         password: '',
-        terms_of_service: false
+        terms_of_service: false,
+        role: 'Android Developer'
     })
 
     const [errors, setErrors] = useState({
         name: '',
         email: '',
         password: '',
-        terms_of_service: ''
+        terms_of_service: '',
+        role: ''
     })
 
     const [post, setPost] = useState([]);
@@ -30,14 +32,15 @@ const Form = (props) => {
             .required("Please enter your password")
             .min(8, "Password is too short - should be 8 characters minimum.")
             .matches(/[a-zA-Z@]/),
-        terms_of_service: yup.boolean().oneOf([true], "Please agree to terms of service")
+        terms_of_service: yup.boolean().oneOf([true], "Please agree to terms of service"),
+        role: yup.string()
     })
 
     useEffect(() => {
         formSchema.isValid(user).then((valid) => {
             setButtonDisabled(!valid);
         })
-    }, [user]);
+    }, [user, formSchema]);
 
     const validate = (event) => {
         yup
@@ -69,7 +72,8 @@ const Form = (props) => {
                     name: '',
                     email: '',
                     password: '',
-                    terms_of_service: ''
+                    terms_of_service: '',
+                    role: ''
                 })
             }))
             .catch((error) => {
@@ -91,23 +95,31 @@ const Form = (props) => {
     return (
         <div>
             <form onSubmit={formSubmit} className='form'> 
-                <label htmlFor="user">User
-                    <label htmlFor='name'>Name
-    <input type='text' placeholder='name' name='name' value={user.name} onChange={inputChange} /> {errors.email.length > 0 ? <p className='error'>{errors.email}</p> : null} <br />
-                    </label>
-                    <label htmlFor='email'>Email
-                        <input type='text' placeholder='email' name='email' value={user.email} onChange={inputChange} /> <br />
-                    </label>
-                    <label htmlFor='password'>Password
-                        <input type='text' placeholder='password' name='password' value={user.password} onChange={inputChange} /> {errors.password.length > 0 ? <p className='error'>{errors.password}</p> : null} <br />
-                    </label>
-                    <label htmlFor='terms_of_service'>I have read the Terms and Conditions
-                        <input type='checkbox' name='terms_of_service' onChange={inputChange} checked={user.terms_of_service} /> <br />
-                    </label>
-                    <button>Submit</button>
+                <label htmlFor='name'>Name
+                    <input type='text' data-cy='name' placeholder='name' name='name' value={user.name} onChange={inputChange} /> {errors.email.length > 0 ? <p className='error'>{errors.email}</p> : null} <br />
                 </label>
+                <label htmlFor='email'>Email
+                    <input type='text' data-cy='email' placeholder='email' name='email' value={user.email} onChange={inputChange} /> <br />
+                </label>
+                <label htmlFor='password'>Password
+                    <input type='text' data-cy='password' placeholder='password' name='password' value={user.password} onChange={inputChange} /> {errors.password.length > 0 ? <p className='error'>{errors.password}</p> : null} <br />
+                </label>
+                <label htmlFor='terms_of_service'>I have read the Terms and Conditions
+                    <input type='checkbox' data-cy='terms_of_service' name='terms_of_service' onChange={inputChange} checked={user.terms_of_service} /> <br />
+                </label>
+                <label htmlFor='role'>Role
+                    <select name='role' data-cy='role' value={user.role} onChange={inputChange}>
+                        <option value='Android Developer'>Android Developer</option>
+                        <option value='iPhone Developer'>iPhone Developer</option>
+                        <option value='Full-stack Developer'>Full-stack Developer</option>
+                        <option value='Back-end Developer'>Back-end Developer</option>
+                        <option value='Front-end Developer'>Front-end Developer</option>
+                        <option value='Data Science'>Data Science</option>    
+                    </select> <br />
+                </label>
+                <button disabled={buttonDisabled} data-cy='submit'>Submit</button>
             </form>
-            {post.map((user) => (<Team className='teamMember' name={user.name} email={user.email} terms_of_service={user.terms_of_service} /> ))}
+            {post.map((user) => (<Team className='teamMember' name={user.name} email={user.email} terms_of_service={user.terms_of_service} role={user.role} /> ))}
         </div>
     )
 }

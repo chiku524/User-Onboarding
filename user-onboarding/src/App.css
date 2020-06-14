@@ -3,9 +3,10 @@ form {
 }
 
 .teamMember {
-  margin: 7%;
+  margin: 1%;
   color: green;
   border: 2px solid purple;
+  border-radius: 10px;
 }
 
 .error {

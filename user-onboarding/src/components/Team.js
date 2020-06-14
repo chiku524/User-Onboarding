@@ -5,6 +5,7 @@ const Team = props => {
         <div className='teamMember'>
             Name: {props.name} <br />
             Email: {props.email} <br />
+            Role: {props.role} <br />
         </div>
     )
 }
